@@ -1,26 +1,28 @@
-const usersModel = require('./../../db/models/users');
+// const usersModel = require('./../../db/models/users');
+const db = require('../../db/db.js');
+const bcrypt = require('bcrypt');
+const salt = 5;
 
-const createNewAuthor = (req, res) => {
+const createNewAuthor = async (req, res) => {
+
 	const { firstName, lastName, age, country, email, password, role } = req.body;
 
-	const user = new usersModel({
-		firstName,
-		lastName,
-		age,
-		country,
-		email,
-		password,
-		role,
-	});
+	const command = `INSERT INTO users( firstName, lastName, age, country, email, password, role_id ) 
+	                        VALUES    (    ?    ,     ?  ,     ? ,  ?    ,   ?    ,  ?  ,   ?)`;
 
-	user
-		.save()
-		.then((result) => {
-			res.status(201).json(result);
-		})
-		.catch((err) => {
-			res.send(err);
-		});
+	// console.log("Author command........", command);
+	let hashedPassword =await bcrypt.hash(password, salt);
+	console.log("password hashed........", hashedPassword);
+
+	const arr = [firstName, lastName, age, country, email, hashedPassword, role];
+	console.log("arr....", arr);
+
+	db.query(command, arr, (err, result) => {
+		if (err) {
+			console.log("newAuthor ....Err:", err);
+		}
+		res.json(result);
+	})
 };
 
 module.exports = {
