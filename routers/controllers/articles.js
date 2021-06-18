@@ -1,14 +1,25 @@
-const articlesModel = require('./../../db/models/articles');
+const db = require('./../../db/db.js');
 
 const getAllArticles = (req, res) => {
-	articlesModel
-		.find({})
-		.then((result) => {
+    const command = `SELECT * FROM articles;`
+
+	db.query(command , (err , result)=>{
+		if(err){
+			res.status(403).json("forbidden");
+		} else {
 			res.status(200).json(result);
-		})
-		.catch((err) => {
-			res.send(err);
-		});
+		}
+	})
+
+
+	// articlesModel
+	// 	.find({})
+	// 	.then((result) => {
+	// 		res.status(200).json(result);
+	// 	})
+	// 	.catch((err) => {
+	// 		res.send(err);
+	// 	});
 };
 
 const getArticlesByAuthor = (req, res) => {
@@ -44,22 +55,22 @@ const getAnArticleById = (req, res) => {
 };
 
 const createNewArticle = (req, res) => {
-	const { title, description, author } = req.body;
+	const { title, description, author_id } = req.body;
+	const command = `INSERT INTO articles (title, description, author_id) VALUES (?,?,?);`
 
-	const article = new articlesModel({
-		title,
-		description,
-		author,
-	});
+	const data = [title, description, author_id];
 
-	article
-		.save()
-		.then((result) => {
+	db.query(command, data, (err, result)=>{
+		if(err){
+			console.log("newArticle ....Err:", err);
+			res.status(403).json("NewArticle not inserted");
+
+		} else {
 			res.status(201).json(result);
-		})
-		.catch((err) => {
-			res.send(err);
-		});
+		}
+
+	})
+
 };
 
 const updateAnArticleById = (req, res) => {
