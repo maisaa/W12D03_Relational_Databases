@@ -40,18 +40,18 @@ const getArticlesByAuthor = (req, res) => {
 const getAnArticleById = (req, res) => {
 	const _id = req.params.id;
 
-	if (!_id) return res.status(404).json('not found');
+	const command = `SELECT * FROM articles WHERE id=?;`;
 
-	articlesModel
-		.findOne({ _id })
-		.populate('author', 'firstName -_id')
-		.exec()
-		.then((result) => {
+	const data = [_id];
+
+	db.query(command, data, (err, result)=>{
+		if(err){
+			res.status(404).json("not found");
+		} else {
 			res.status(200).json(result);
-		})
-		.catch((err) => {
-			res.send(err);
-		});
+		}
+	})
+
 };
 
 const createNewArticle = (req, res) => {
@@ -70,7 +70,6 @@ const createNewArticle = (req, res) => {
 		}
 
 	})
-
 };
 
 const updateAnArticleById = (req, res) => {
